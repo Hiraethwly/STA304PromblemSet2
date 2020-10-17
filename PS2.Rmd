@@ -5,6 +5,7 @@ date: "10/14/2020"
 output: pdf_document
 ---
 
+
 ```{r}
 library(readr)
 gss <- read_csv("gss.csv")

@@ -1,0 +1,153 @@
+---
+title: "Title of Your Report"
+author: "Names of your Group Members"
+date: "Due Date"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r, echo = FALSE}
+library(readr)
+setwd("~/Desktop/R studio/STA304/STA304PromblemSet2")
+gss <- read.csv("gss.csv")
+data_gss <- gss %>% select(feelings_life, sex, age, marital_status, hh_size, income_respondent) %>% filter(!is.na(feelings_life))
+```
+
+## Title of your Report
+
+# Name(s) of Author(s) 
+# Date
+
+## Abstract
+
+Here is where you give a brief (one paragraph overview of your entire paper). This should include some background/introduction, some methodology/Methods, results and conclusions.
+
+## Introduction
+
+The participants took this survey by computer assisted telephone interview, with their selected language.
+
+The target population: All persons whose age is equal or above fifteen in Canada, excluding residents living in Yukon, Northwest Territories and Nunavut and full-time residents of institutions.
+
+The frame population includes two components. One is the lists of telephone numbers in current use which can be found at Statistics Canada; The other is the Address Register (AR), which is a list of dwellings within the ten provinces. AR is able to link all available telephone numbers with the same valid address and 86 percent is linked successfully by AR.
+
+Sample: The randomly selected persons to participate in the telephone interview.
+
+In order to obtain the survey sample, they applied a method called stratified random sampling and divided ten provinces into strata by geographic areas. There exist 27 strata in total. In each stratum, they used simple random sampling without replacement. After that, they obtained the 2017 GSS dataset.
+
+Targeting on those people who at first refused to response, they would re-contact them again up to two more times and try to motivate them to participate by explaining the importance of this survey. Besides, if the timing of the interviewer's call was inconvenient, they would make an appointment with them and call back. If there was no one home, they would call backs until they responsed.
+
+The cost of carrying out this survey is absolutely high, no matter in time and energy or in financial aspect.
+
+In this report, we will explore 
+
+## Data
+
+Introduce the data, explain why it was selected. Make sure to comment on important features and highlight any potential drawbacks to the data.
+
+
+## Model
+
+Introduce the selected model here. It is expected that you will use some mathematical notation here. If you do please ensure that all notation is explained. You may also want to discuss any special (hypothetical) cases of your model here, as well as any caveats.  
+
+
+## Results
+
+```{r, echo = FALSE}
+data_gss %>% ggplot(aes(x = feelings_life)) + geom_histogram(bins=5) + ggtitle("The histogram of feelings_life, Figure 1")
+```
+
+From the above histogram of feelings_life: The distribution is left-skewed, single-peaked. The center of it might be 7.5 and the feelings_life of those non-institutionalized persons of 15 years of age and older surveyed, living in the 10 provinces of Canada is mostly concentrated between 6 and 10. Besides, there are some outliers in this histogram which are representative for those small number of persons who had a lower satisfactory of life or those who misreported the data.
+
+```{r, echo = FALSE}
+data_gss %>% ggplot(aes(x = sex, y = feelings_life)) + geom_boxplot() + ggtitle("The boxplot of feelings_life, Figure 2")
+```
+
+From the above two boxplots: The medians of both boxplots are in the middle so that the distributions of those two boxplots are symmetric. Besides, the IQR (Interquartile range) of both boxplots are approximately the same. However, both of them have some ourliers which are representative for those small number of persons who had a lower satisfactory of life. 
+
+```{r, echo = FALSE}
+data_gss %>%
+  filter(!is.na(marital_status)) %>%
+  group_by(marital_status) %>%
+  summarise(mean_feelings_life = mean(feelings_life), sd_feelings_life = sd(feelings_life), min_feelings_life = min(feelings_life), max_feelings_life = max(feelings_life), median_feelings_life = median(feelings_life)) %>%
+  arrange(desc(mean_feelings_life))
+```
+
+The summary table above shows the mean, median, minimum, maximum and standard deviation of feelings_life from different kinds of marital status. We have known that mean of median is a measurement of the center of a variable so that I use arrange in R to arrange the mean_feelings_life of different kinds of marital status. We can find out that those people who have married had the highest mean_feelings_life and those whose marital status is separated had the lowest mean_feelings_life.
+
+```{r, echo = FALSE}
+mod <- lm(feelings_life ~ as.factor(sex) + hh_size + marital_status, data = data_gss)
+summary(mod)
+```
+
+From the multiple linear regression model, we fit a linear regression model from feelings_life, sex, hh_size and marital_status:
+we estimates this:
+\begin{align*}
+\hat{feelings\_life} &= \beta_{0} - \beta_{1}\hat{Male} + \beta_{2}\hat{hh\_size} + \beta_{3}\hat{marital\_statusLiving common-law} + \beta_{4}\hat{marital\_statusMarried} -\beta_{5}\hat{marital\_statusSeparated}\\ &-\beta_{6}\hat{marital\_statusSingle, never married} + \beta_{7}\hat{marital\_statusWidowed }\\
+\text{For Male:}\\
+\hat{feelings\_life} &= 7.67929 -0.09291 + 0.02405\hat{hh\_size} + 0.51946\hat{marital\_statusLiving common-law} + 0.73120\hat{marital\_statusMarried} \\
+& -0.36255\hat{marital\_statusSeparated} -0.01037\hat{marital\_statusSingle, never married} + 0.26494\hat{marital\_statusWidowed }\\
+\text{For Female:}\\
+\hat{feelings\_life} &= 7.67929 + 0.02405\hat{hh\_size} + 0.51946\hat{marital\_statusLiving common-law} + 0.73120\hat{marital\_statusMarried} \\
+& -0.36255\hat{marital\_statusSeparated} -0.01037\hat{marital\_statusSingle, never married} + 0.26494\hat{marital\_statusWidowed }
+\end{align*}
+
+In order to test whenever there is a significant linear relationship between feelings_life, sex, hh_size and marital_status. We need to do hypothesis testing to interpret the estimates of the regression parameters.
+
+Interpretation of intercept estimate.
+$H_{0}:\beta_{0} = 0$\
+$H_{a}:\beta_{0} \neq 0$\
+The null hypothesis states that the $\beta_{0}$ is equal to zero, while the alternative hypothesis states that the $\beta_{0}$ is not equal to zero.\
+In this case, we use a benchmark significance level of 5%;thus,the p_value is 2e-16 which is extremely smaller than 0.05. \
+As a result, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and intercept estimate. \
+
+Interpretation of s$\beta_{1}$ estimate.
+$H_{0}:\beta_{1} = 0$\
+$H_{a}:\beta_{1} \neq 0$\
+The null hypothesis states that the $\beta_{1}$ is equal to zero, while the alternative hypothesis states that the $\beta_{1}$ is not equal to zero.\
+Since the p_value is -0.09291 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and sex. \
+
+Interpretation of s$\beta_{2}$ estimate.
+$H_{0}:\beta_{2} = 0$\
+$H_{a}:\beta_{2} \neq 0$\
+The null hypothesis states that the $\beta_{2}$ is equal to zero, while the alternative hypothesis states that the $\beta_{2}$ is not equal to zero.\
+Since the p_value is 0.02405 which is smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and hh_size. \
+
+put it together or split it up
+Interpretation of s$\beta_{3}$ estimate.
+Interpretation of s$\beta_{4}$ estimate.
+Interpretation of s$\beta_{5}$ estimate.
+Interpretation of s$\beta_{6}$ estimate.
+Interpretation of s$\beta_{7}$ estimate.
+
+In addition, the standard error of the estimate is a measure of the accuracy of predictions.As we can see from the graph, the standard error of the estimates of all the parameter are relatively small. When the standard error is small, the sample data is said to be more representative of the true mean. Thus, we also can conclude that out predictions support the true relation of feelings_life, sex, hh_size and marital_status.
+
+Last but no least, the Residual standard error is the average distance that the response will deviate from the true regression line. In this case, we have residual standard error at 1.605 on 20317 degrees of freedom which tells us that average distance of the data points from the fitted line is about 1.605%. This a relatively small value; hence, we have evidence to suggest the linear model has predictive ability.
+
+## Discussion
+
+Here you will discuss conclusions drawn from the results and comment on how it relates to the original goal of the study (which was specified in the Introduction).
+
+
+# Weaknesses
+
+Here we discuss weaknesses of the study, data, analysis, etc. You can also discuss areas for improvement.
+
+
+# Next Steps
+
+Here you discuss subsequent work to be done after this report. This can include next steps in terms of statistical analysis (perhaps there is a more efficient algorithm available, or perhaps there is a caveat in the data that would allow for some new technique). Future steps should also be specified in terms of the study setting (eg. including a follow-up survey on something, or a subsequent study that would complement the conclusions of your report).
+
+
+## References
+
+
+

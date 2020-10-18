@@ -109,7 +109,7 @@ The null hypothesis states that the $\beta_{0}$ is equal to zero, while the alte
 In this case, we use a benchmark significance level of 5%;thus,the p_value is 2e-16 which is extremely smaller than 0.05. \
 As a result, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and intercept estimate. \
 
-Interpretation of s$\beta_{1}$ estimate.
+Hypothesis Testing of s$\beta_{1}$ estimate.
 $H_{0}:\beta_{1} = 0$\
 $H_{a}:\beta_{1} \neq 0$\
 The null hypothesis states that the $\beta_{1}$ is equal to zero, while the alternative hypothesis states that the $\beta_{1}$ is not equal to zero.\

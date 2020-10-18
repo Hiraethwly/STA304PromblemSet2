@@ -124,7 +124,7 @@ Since the p_value is 0.02405 which is smaller than 0.05, we reject $H_{0}$ in fa
 put it together or split it up
 Interpretation of s$\beta_{3}$ estimate.
 Interpretation of s$\beta_{4}$ estimate.
-Interpretation of s$\beta_{5}$ estimate.
+Interpretation of s$\beta_{5}$ estimate
 Interpretation of s$\beta_{6}$ estimate.
 Interpretation of s$\beta_{7}$ estimate.
 

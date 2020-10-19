@@ -1,10 +1,12 @@
 ---
-title: "Title of Your Report"
-author: "Names of your Group Members"
-date: "Due Date"
+title: "The relationship between feelings life and family and health"
+author: Linxia Li (1005715488), Leyi Wang (1006318682), Xingnuo Zhang (1006145306),
+  Yanlin Li (1003770305)
+date: "October 23, 2020"
 output:
-  html_document:
-    df_print: paged
+  pdf_document: default
+  html_document: default
+Repo: Code and data supporting this analysis is available at https://github.com/Hiraethwly/STA304PromblemSet2
 ---
 
 ```{r setup, include=FALSE}
@@ -12,142 +14,598 @@ knitr::opts_chunk$set(echo = FALSE)
 
 library(dplyr)
 library(tidyverse)
-library(ggplot2)
+library(knitr)
+library(gridExtra)
+
 ```
 
 ```{r, echo = FALSE}
 library(readr)
-setwd("~/Desktop/R studio/STA304/STA304PromblemSet2")
 gss <- read.csv("gss.csv")
-data_gss <- gss %>% select(feelings_life, sex, age, marital_status, hh_size, income_respondent) %>% filter(!is.na(feelings_life))
 ```
 
-## Title of your Report
+# Abstract
 
-# Name(s) of Author(s) 
-# Date
+In our research, we are interested in analyzing how family (marital status and total children) and health (self-rated health and self-rated mental health) can affect respondents’ feeling of life in the GSS dataset as feelings_life is a good indicator to reflect citizens’ standard of living. By making assumptions and fitting a multiple linear regression model, we found that there exists a positive correlation between explanatory variable and response variable. To illustrate, in the family aspect, along with the increase in stability of marital status and number of children, the index of feeling of life increases. Similarly, in the health aspect, the physical and mental health enhances the quality of life.
 
-## Abstract
 
-Here is where you give a brief (one paragraph overview of your entire paper). This should include some background/introduction, some methodology/Methods, results and conclusions.
+# Introduction
 
-## Introduction
+In this report, we focus on General Social Survey (GSS). The goal of GSS is to monitor the overall standard of living and well-being of Canadian by analyzing the social trend and citizens’ thoughts. Besides, it acts as a guide and provides information of current interest on social issues. We chose this data because by analyzing this data, we can conclude how some features of interest can affect Canadian's well-being and what can make our lives better. 
 
-The participants took this survey by computer assisted telephone interview, with their selected language.
+We identify respondents' feelings of life as our major interest, because we think it is a representative feature of Canadian's living standard and well-being. Thus, choosing this variable is consistent with our goal mentioned above. 
 
-The target population: All persons whose age is equal or above fifteen in Canada, excluding residents living in Yukon, Northwest Territories and Nunavut and full-time residents of institutions.
+In this report, we will explore how a respondent's feelings of life can be affected by two of the major aspects of his (or her) life: family and health. We identified two features for each aspect. For family, we consider marital status and total children as the representative parts. In case of health, self rated health and self rated mental health are the chosen features. 
 
-The frame population includes two components. One is the lists of telephone numbers in current use which can be found at Statistics Canada; The other is the Address Register (AR), which is a list of dwellings within the ten provinces. AR is able to link all available telephone numbers with the same valid address and 86 percent is linked successfully by AR.
+We use linear regression to analyze our data and made the following inferences: 
 
-Sample: The randomly selected persons to participate in the telephone interview.
+1. In family aspect, if people have more stable conjugal relationship and children, they tend to have a better feeling of life.
 
-In order to obtain the survey sample, they applied a method called stratified random sampling and divided ten provinces into strata by geographic areas. There exist 27 strata in total. In each stratum, they used simple random sampling without replacement. After that, they obtained the 2017 GSS dataset.
+2. In health aspect, if people have a physical and metal health condition, they also tend to have a better feeling of life. 
 
-Targeting on those people who at first refused to response, they would re-contact them again up to two more times and try to motivate them to participate by explaining the importance of this survey. Besides, if the timing of the interviewer's call was inconvenient, they would make an appointment with them and call back. If there was no one home, they would call backs until they responsed.
+Here is a brief description about each part of our report:
+
+1. **Data: **We will discuss the survey and the data, the key features strengths and weaknesses about them and some plots and raw data.
+
+2. **Model: **We will establish our variables and present the relationship between the variables we are going to use. Besides, we will choose the model and explain it, discuss the features and the final model and do diagnostic checks. 
+
+3. **Results: **We will present our results and explain them. 
+
+4. **Discussion: **We will talk about the survey, data and the model, identify strengths and weaknesses. 
 
 The cost of carrying out this survey is absolutely high, no matter in time and energy or in financial aspect.
 
-In this report, we will explore 
 
-## Data
+# Data
 
-Introduce the data, explain why it was selected. Make sure to comment on important features and highlight any potential drawbacks to the data.
+## Introduction of the Survey Data
+
+The General Social Survey (GSS) program, established in 1985, conducts telephone surveys across the ten provinces. The GSS is recognized for its regular collection of cross-sectional data that allows for trend analysis, and its capacity to test and develop new concepts that address current or emerging issues. In the GSS dataset, it contains 20602 observations and 81 variables. 
+
+The participants took this survey by Computer Assisted Telephone Interview, with their selected language.
+
+**The target population (The set of all the units covered by the main objective of the study): **All persons whose age is equal or above fifteen in Canada, excluding residents living in Yukon, Northwest Territories and Nunavut and full-time residents of institutions.
+
+**Sampling frame (A source material or device/list from which a sample is drawn): **The sampling frame includes two components. One is the lists of telephone numbers in current use which can be found at Statistics Canada; The other is the Address Register (AR), which is a list of dwellings within the ten provinces. AR is able to link all available telephone numbers with the same valid address and 86 percent is linked successfully by AR.
+
+**The frame population: (The set of all units covered by the sampling frame)**The frame population is all the targeted population that can be accessible by the sampling frame listed above. 
+
+**Sample: (The population represented by the survey sample)**The randomly selected persons to participate in the telephone interview.
+
+**Sampling method:** In order to obtain the survey sample, they applied a method called Stratified Random Sampling, which divides the population into smaller sub-groups by homogeneous characteristic known as strata. This method ensures the equally likely probability of being selected from the entire population. By this method, they divided ten provinces into strata by geographic areas. There exist 27 strata in total. In each stratum, they used Simple Random Sampling without replacement. Specifically, this method assigned a sequence of number in the stratum, and used random number generator to do the sample selection. After that, they obtained the 2017 GSS dataset.
+
+**Non-response Problems and solutions:** Targeting on those people who at first refused to response, they would re-contact them again up to two more times and try to motivate them to participate by explaining the importance of this survey. Besides, if the timing of the interviewer's call was inconvenient, they would make an appointment with them and call back. If there was no one home, they would call backs until they response.
+
+## Strengths and Weaknesses
+
+### Strengths
+
+**The strength of the data: **Based on the large sample size, we are able to analyze the relationship among different variables and have an accurate inference to support assumptions. 
+
+**The strength of the survey: **It involves many aspects of living conditions such as marital status, health condition, and income. Therefore, it provides an overview about the basic living conditions of people aged 15 and over in Canada. 
+
+### Weaknesses
+
+**The weaknesses of the data: **There exists lots of non-response data (NA). After we filter out those data, it does not play an essential role in influencing the response variable. To be specific, it reduces sample size, which decreases the precision of estimators and increases the standard error.
+
+**The weaknesses of the survey: **
+
+1. The question "Using a scale of 0 to 10 means "Very dissatisfied" and 10 means "Very satisfied", how do you feel about your life as a whole right now?". For the option of this question, 0 means very dissatisfied, 5 means generally satisfied and 10 means very satisfied. However, some people who were not satisfied with their life might select 0, 1 or 2 so that this choice makes the resulting data become less accurate. 
+
+2. Some questions include privacy issues so that a number of respondents are not willing to disclose their personal information or provide inaccurate data instead. Either one of these situations may influence the accuracy of our analysis and conclusion.
+
+3. They did not introduce weights to each groups of people, such as gender. Because different groups may have differences between each other, there may be biases that can make the sample not representative to the whole population. 
+
+## Feature selection
+
+Here are the features that we selected into our dataset. 
+
+**Sample composition: **age, sex
+
+**Response variable: **feelings of life. 
+
+**Features:** **(See Appendix for more about how we select features)**
+
+1. Family: marital_status, total_children
+
+2. Health: self_rated_health, self_rated_mental_health
+
+We reject features based on the following criterion:
+
+1. Too many NAs: If there are too many NAs in this feature, we reject it for the convenience of our analysis. Rejecting these features can also avoid biases caused by non-response. 
+
+2. Replication: For our linear regression model, we should make sure that each features are independent. Thus, we choose the most representative ones among a certain type. 
+
+3. Not correlated with response variable: For the simplicity of our model, we tend to choose the features that are most correlated with the model. 
+
+**(See Appendix for more about how we select features)**
+
+## Cleaning the data
+
+We clean the data using the package ```tidyverse``` and removed all the NAs in the cleaned data. Here is the first few rows of the data we will use. (Table 1)
 
 
-## Model
+```{r, echo=FALSE}
 
-Introduce the selected model here. It is expected that you will use some mathematical notation here. If you do please ensure that all notation is explained. You may also want to discuss any special (hypothetical) cases of your model here, as well as any caveats.  
+data <- gss %>%
+  select(feelings_life, age, sex, marital_status, total_children, self_rated_health, self_rated_mental_health)
 
+data = na.omit(data)
 
-## Results
-
-```{r, echo = FALSE}
-data_gss %>% ggplot(aes(x = feelings_life)) + geom_histogram(bins=5) + ggtitle("The histogram of feelings_life, Figure 1")
+kable(head(data), caption = "Table 1 - First few rows of data")
 ```
 
-From the above histogram of feelings_life: The distribution is left-skewed, single-peaked. The center of it might be 7.5 and the feelings_life of those non-institutionalized persons of 15 years of age and older surveyed, living in the 10 provinces of Canada is mostly concentrated between 6 and 10. Besides, there are some outliers in this histogram which are representative for those small number of persons who had a lower satisfactory of life or those who misreported the data.
+Here are two summary about the numerical (Table 2) and categorical (Table 3) data that we will use. 
 
-```{r, echo = FALSE}
-data_gss %>% ggplot(aes(x = sex, y = feelings_life)) + geom_boxplot() + ggtitle("The boxplot of feelings_life, Figure 2")
+```{r, echo=FALSE}
+kable(summary(data[c(1,5)]), caption = "Table 2 - Summary of numerical data")
+
+Marital_status = as.data.frame(table(data$marital_status))
+health = as.data.frame(table(data$self_rated_health))
+mental_health = as.data.frame(table(data$self_rated_mental_health))
+kable(cbind(c("Maritial status", "", "Self rated health", "","Self rated mental health",""), rbind(levels(Marital_status$Var1), Marital_status$Freq, levels(health$Var1), health$Freq, levels(mental_health$Var1), mental_health$Freq)), caption = "Table 3 - Counting categorical data")
 ```
 
-From the above two boxplots: The medians of both boxplots are in the middle so that the distributions of those two boxplots are symmetric. Besides, the IQR (Interquartile range) of both boxplots are approximately the same. However, both of them have some ourliers which are representative for those small number of persons who had a lower satisfactory of life. 
+## Presenting the data
+
+### Basic composition of the sample 
+
+Here are two plots that can depict the basic composition of the sample: The sex (Graph 1) and the age (Graph 2). 
 
 ```{r, echo = FALSE}
-data_gss %>%
-  filter(!is.na(marital_status)) %>%
+sex = as.data.frame(table(data$sex))
+names(sex) = c('group', 'value')
+sex <- sex %>% 
+  arrange(desc(group)) %>%
+  mutate(prop = value / sum(sex$value) *100)
+plot.sex <- sex %>%
+  ggplot(aes(x='', y=value, fill=group))+
+  geom_bar(width = 1, stat = "identity")+
+  coord_polar("y", start=0)+
+  theme_void()+
+  geom_text(aes(label = paste0(round(prop, 2), "%")), position = position_stack(vjust = 0.5), color = "black", size=1.5)+
+  ggtitle("Graph 1 - Sex - Pie Chart")
+
+theme_set(theme_classic())
+plot.age <- data %>%
+  ggplot(aes(x=age)) +
+  geom_histogram(binwidth=5)+
+  ggtitle("Graph 2 - Age - Histogram")
+
+grid.arrange(plot.sex, plot.age, nrow = 1)
+```
+
+**Inference: **
+
+1. Sex: There are slightly more female than male, but the difference is not large. 
+
+2. Age: The histogram is left-skewed. So there are more middle-aged and elderly respondents than young respondents. However, it covers all the targeted age groups. 
+
+Thus this sample is valid for inferences. 
+
+### Variable of Interest
+
+Here is the Histogram for our variable of interest -- Feelings of life (Graph 3). 
+
+```{r, echo = FALSE}
+data %>% 
+  ggplot(aes(x = feelings_life)) + 
+  geom_histogram(bins = 10) + 
+  labs(title = "Graph 3 - Feelings of life - Histogram", x = "feelings", y = "respondents")
+```
+
+**Inference:**
+From the above histogram of feelings_life: 
+
+1. The distribution is left-skewed, single-peaked. The center of it might be 7.5 and the feelings_life of those non-institutionalized persons of 15 years of age and older surveyed, living in the 10 provinces of Canada is mostly concentrated between 6 and 10. 
+
+2. There are some outliers in this histogram which are representative for those small number of persons who had a lower satisfactory of life or those who misreported the data.
+
+\newpage
+
+# Model
+
+## Model selection
+
+### Relationships between variables
+
+#### Health & feelings of life
+
+```{r, echo = FALSE, fig.height = 3, fig.width = 5, fig.align = "center"}
+plot.health <- data %>% 
+  ggplot(aes(x = self_rated_health, y = feelings_life)) + 
+  geom_boxplot() + 
+  labs(title = "Feelings of life vs. Self rated health (Graph 4)", x = "health", y = "feelings")
+
+plot.mhealth <- data %>% 
+  ggplot(aes(x = self_rated_mental_health, y = feelings_life)) + 
+  geom_boxplot() + 
+  labs(title = "Feelings of life vs. Self rated mental health (Graph 5)", x = "mental health", y = "feelings")
+
+grid.arrange(plot.health, plot.mhealth, nrow = 2)
+```
+
+**Inference: **
+
+1. Self rated health:
+
+a. The medians of boxplots (Excellent, Fair, Good) are in the middle so that the distributions of those three boxplots are symmetric. The medians of boxplots (Don't know, Poor, Very Good) are below the middle so that the distributions of those two boxplots are right-skewed.
+
+b. The IQR (Interquartile range) of the boxplot (Poor) is the largest. The IQR of those four boxplots (Don't know, Excellent, Fair and Good) are approximately the same. The IQR of the boxplot (Very Good) is the smallest. However, some of them have some ourliers which are representative for those small number of persons who had a lower satisfactory of life.
+
+2. Self rated mental health:
+
+a. The medians of boxplots (Don't know, Excellent, Good) are in the middle so that the distributions of those three boxplots are symmetric. The medians of boxplots (Fair, Poor) are above the middle so that the distributions of those two boxplots are left-skewed. The medians of the boxplot (Very Good) is below the middle so that the distribution of the boxplot is right-skewed.
+
+b. The IQR (Interquartile range) of the boxplot (Don't know) is the largest. The IQR of those two boxplots (Fair and Poor) are approximately the same. The IQR of those two boxplots (Excellent and Good) are approximately the same. The IQR of the boxplot (Very good) is the smallest. However, some of them have some ourliers which are representative for those small number of persons who had a lower satisfactory of life.
+
+#### Family & Feelings of life
+
+```{r, echo = FALSE}
+data %>%
   group_by(marital_status) %>%
   summarise(mean_feelings_life = mean(feelings_life), sd_feelings_life = sd(feelings_life), min_feelings_life = min(feelings_life), max_feelings_life = max(feelings_life), median_feelings_life = median(feelings_life)) %>%
   arrange(desc(mean_feelings_life))
 ```
 
-The summary table above shows the mean, median, minimum, maximum and standard deviation of feelings_life from different kinds of marital status. We have known that mean of median is a measurement of the center of a variable so that I use arrange in R to arrange the mean_feelings_life of different kinds of marital status. We can find out that those people who have married had the highest mean_feelings_life and those whose marital status is separated had the lowest mean_feelings_life.
-
 ```{r, echo = FALSE}
-mod <- lm(feelings_life ~ as.factor(sex) + hh_size + marital_status, data = data_gss)
+data %>%
+  group_by(total_children) %>%
+  summarise(mean_feelings_life = mean(feelings_life), sd_feelings_life = sd(feelings_life), min_feelings_life = min(feelings_life), max_feelings_life = max(feelings_life), median_feelings_life = median(feelings_life)) %>%
+  arrange(desc(mean_feelings_life))
+```
+
+**Inference:**
+
+1. Marital status:
+
+The summary table above shows the mean, median, minimum, maximum and standard deviation of feelings_life from different kinds of marital status. We have known that mean or median is a measurement of the center of a variable so that I use arrange in R to arrange the mean_feelings_life of different kinds of marital status. We can find out that those people who have married had the highest mean_feelings_life and those whose marital status is separated had the lowest mean_feelings_life.
+
+2. Total children
+
+The summary table above shows the mean, median, minimum, maximum and standard deviation of feelings_life from different numbers of total children. We have known that mean of median is a measurement of the center of a variable so that I use arrange in R to arrange the mean_feelings_life of different numbers of total children. We can find out that those people who have 4 children had the highest mean_feelings_life and those who did not have children had the lowest mean_feelings_life.
+
+## Model identification
+
+We use four variables such as marital_status, total_children, self_rated_health and self_rated_mental_health to fit a multiple linear regression model with feelings_life as a response variable.
+
+**Discussions of the four independent variables (features)**
+
+**Marital_status:**This is a categorical variable that has five types. We use marital_status rather than marital_status-groups since different types of marital status can have different influences on the feelings_life. From the above summary table we make, we can find out that different types of marital_status has various mean of feelings_life so that we should use it instead of the groups of it.
+
+**total_children:**This is a numerical variable that is a data variable taking on any value within 0 and 7. We can not treat it as a categorical variable in our model since different numbers of children can have various influences on the feelings_life. If we treat it as a categorical variable, our predictions and the analysis of the model might be inaccurate.
+
+**self_rated_health and self_rated_mental_health:**These are two categorical variables which measure the quality of the physical and mental health of a person. 
+
+Overall, we chose these four independent variables and use them in the model to predict feelings_life since all of them can influence the feelings life of a person. We chose feelings_life as a response variable since it can reflect the overall standard of living of a person. Besides, in the survey, the question related to it divided feelings_life into different levels so that we can have a better understanding of the living conditions of people in Canada by using it as the response variable and analysing it.  
+
+**Reasons to choose multiple linear regression model**
+
+1. Multiple linear regression is a regression model that estimates the relationship between a quantitative dependent variable and two or more independent variables using a straight line. Here, marital_status, total_children, self_rated_health and self_rated_mental_health are four independent variables and all of them can influence feelings_life which is a quantitative dependent variable. Therefore, we can use multiple linear regression model to estimate the relationship between them.
+
+2. For the Bayesian model, it assumes the parameters we would like to explore follow some distributions. However, we did not explore the distributions of those four variables so that we can not use the Bayesian model.
+
+3. For the logistics regression model, it is a statistical model that in its basic form uses a logistic function to model a binary response variable. We use feelings_life as the response variable which counts from 0 to 10. Different number represents different levels of satisfaction. If we change our response variable to the binary form 0 and 1, it can only show whether a person is happy or not instead of showing different levels of satisfaction. Therefore, we are not willing to change the response variable to a binary form so that we can not use the logistics regression model.
+```{r echo=FALSE}
+mod <- lm(feelings_life ~ marital_status + total_children + self_rated_health + self_rated_mental_health, data = data)
+```
+
+\newpage
+**Our Linear Model:**
+
+## Model Diagnostics
+
+```{r warning=FALSE}
+library(ggfortify)
+autoplot(mod, size = 0.2, label.size = 2)
+```
+
+**Residuals vs Fitted**
+
+We can find out that there is a pattern in this residuals and fitted plot. Therefore, the shape of the pattern provides information on the function of x that is missing from the model.
+
+**Normal QQ plot**
+
+The normal QQ plot shows if residuals are normally distributed. We have known that if the residuals are lined well on the straight dashed line, the model we can fit is pretty good. From the normal QQ plot we made, we can find out that the residuals which are on the bottom left of this plot are not on the straight dashed line. However, most of the residuals are lined well on the straight line so that the model we would like to fit is good.
+
+**Scale-Location (Spread-Location plot)**
+
+The scale-location plot is also called spread-location plot. This plot can show if residuals are spread equally along the ranges of predictors. If we can find out a horizontal line with equally and randomly spread points, the model we can fit is pretty good. Besides, this plot can also assist us to check the assumption of equal variance. From the scale-location plot we made, we can find out that the residuals appear randomly spread so that the model we would like to fit is good.
+
+**Residuals vs Leverage**
+
+This kind of plot can help us to find the influential cases. We have known that not all outliers are influential in the linear regression analysis. Even though they have extreme values, they might not be important to determine a regression line which means that the results (model we would like to fit) would not be much different if we include or exclude them from analysis. However, some outliers can have an influence on the results. If there are some outliers at the upper right corner or at the lower right corner, the results can be influenced. However, in the residuals vs leverage plot we made, we did not find any points which are at the upper right corner of at the lower right corner so that the model we would like to fit is good.
+
+
+# Results
+
+## Model Summary
+
+Here is the summary table for our model. (Summary table 1)
+
+Summary table 1 
+```{r, echo = FALSE}
+mod <- lm(feelings_life ~ marital_status + total_children + self_rated_health + self_rated_mental_health, data = data)
 summary(mod)
 ```
 
-From the multiple linear regression model, we fit a linear regression model from feelings_life, sex, hh_size and marital_status:
+From the multiple linear regression model, we fit a linear regression model from feelings_life, marital_status, total_children,self_rated_health, and self_rated_mental_health:\
 we estimates this:
-\begin{align*}
-\hat{feelings\_life} &= \beta_{0} - \beta_{1}\hat{Male} + \beta_{2}\hat{hh\_size} + \beta_{3}\hat{marital\_statusLiving common-law} + \beta_{4}\hat{marital\_statusMarried} -\beta_{5}\hat{marital\_statusSeparated}\\ &-\beta_{6}\hat{marital\_statusSingle, never married} + \beta_{7}\hat{marital\_statusWidowed }\\
-\text{For Male:}\\
-\hat{feelings\_life} &= 7.67929 -0.09291 + 0.02405\hat{hh\_size} + 0.51946\hat{marital\_statusLiving common-law} + 0.73120\hat{marital\_statusMarried} \\
-& -0.36255\hat{marital\_statusSeparated} -0.01037\hat{marital\_statusSingle, never married} + 0.26494\hat{marital\_statusWidowed }\\
-\text{For Female:}\\
-\hat{feelings\_life} &= 7.67929 + 0.02405\hat{hh\_size} + 0.51946\hat{marital\_statusLiving common-law} + 0.73120\hat{marital\_statusMarried} \\
-& -0.36255\hat{marital\_statusSeparated} -0.01037\hat{marital\_statusSingle, never married} + 0.26494\hat{marital\_statusWidowed }
-\end{align*}
 
-In order to test whenever there is a significant linear relationship between feelings_life, sex, hh_size and marital_status. We need to do hypothesis testing to interpret the estimates of the regression parameters.
+$$\begin{aligned}
+\hat{feelings\_life} &= \beta_{0} + \beta_{1}marital\_statusLiving common-law + \beta_{2}marital\_statusMarried \\
+&+\beta_{3}marital\_statusSeparated +\beta_{4}marital\_statusSingle, never married \\
+&+ \beta_{5}marital\_statusWidowed + \beta_{6}total\_children\\
+&+\beta_{7}self\_rated\_healthExcellent +\beta_{8}self\_rated\_healthFair \\ &+\beta_{9}self\_rated\_healthGood \\
+&+\beta_{10}self\_rated\_healthPoor + \beta_{11}self\_rated\_healthVery good \\ &+\beta_{12}self\_rated\_mental\_healthExcellent\\ &+\beta_{13}self\_rated\_mental\_healthFair \\ &+\beta_{14}self\_rated\_mental\_healthGood  +\beta_{15}self\_rated\_mental\_healthPoor \\
+&+ \beta_{16}self\_rated\_mental\_healthVery good\\
+\end{aligned}$$
 
-Interpretation of intercept estimate.
+$$\begin{aligned}
+\hat{feelings\_life} &= 7.050402 + 0.353663marital\_statusLiving common-law + 0.519051marital\_statusMarried \\
+&-0.267279marital\_statusSeparated +0.042546marital\_statusSingle, never married \\ &+0.238293marital\_statusWidowed + 0.070904total\_children\\
+&+0.831200self\_rated\_healthExcellent +0.067463self\_rated\_healthFair  \\
+&+0.421057 self\_rated\_healthGood \\
+&-0.740315self\_rated\_healthPoor +  0.630628 self\_rated\_healthVery good\\ &+0.719563self\_rated\_mental\_healthExcellent \\ &-1.248459self\_rated\_mental\_healthFair\\
+&-0.220055self\_rated\_mental\_healthGood -2.529230 self\_rated\_mental\_healthPoor\\
+&+0.273097 \beta_{16}self\_rated\_mental\_healthVery good
+\end{aligned}$$
+
+From the above regression line, we can interpret as if given other predictors holds constant, when marital_statusLiving common-law increase 1 unit, on average, feelings_life will increases by 0.353663 unit. This concept apply to other predictors in the same way, for example, given other predictors holds constant, marital_statusSeparated decrease 1 unit, on average, feelings_life will decrease by 0.267279 unit. 
+
+### Hypothesis tests
+
+In order to test whenever there is a significant linear relationship between feelings_life, marital_status, total_children,self_rated_health, and self_rated_mental_health. We need to do hypothesis testing for the estimates of the regression parameters.
+
+Hypothesis Testing of intercept estimate.\
 $H_{0}:\beta_{0} = 0$\
 $H_{a}:\beta_{0} \neq 0$\
 The null hypothesis states that the $\beta_{0}$ is equal to zero, while the alternative hypothesis states that the $\beta_{0}$ is not equal to zero.\
-In this case, we use a benchmark significance level of 5%;thus,the p_value is 2e-16 which is extremely smaller than 0.05. \
+In this case, we use a benchmark significance level of 5%;thus,the p_value of the intercept estimate is 2e-16 which is extremely smaller than 0.05. \
 As a result, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and intercept estimate. \
 
-Hypothesis Testing of s$\beta_{1}$ estimate.
+Hypothesis Testing of $\beta_{1}$ estimate.\
 $H_{0}:\beta_{1} = 0$\
 $H_{a}:\beta_{1} \neq 0$\
 The null hypothesis states that the $\beta_{1}$ is equal to zero, while the alternative hypothesis states that the $\beta_{1}$ is not equal to zero.\
-Since the p_value is -0.09291 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and sex. \
+Since the p_value of $\beta_{1}$ is 7.72e-15 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and marital_statusLiving common-law. \
 
-Interpretation of s$\beta_{2}$ estimate.
+Hypothesis Testing of $\beta_{2}$ estimate.\
 $H_{0}:\beta_{2} = 0$\
 $H_{a}:\beta_{2} \neq 0$\
-The null hypothesis states that the $\beta_{2}$ is equal to zero, while the alternative hypothesis states that the $\beta_{2}$ is not equal to zero.\
-Since the p_value is 0.02405 which is smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and hh_size. \
+Since the p_value of $\beta_{2}$ is 2e-16 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and marital_statusMarried. \
 
-put it together or split it up
-Interpretation of s$\beta_{3}$ estimate.
-Interpretation of s$\beta_{4}$ estimate.
-Interpretation of s$\beta_{5}$ estimate
-Interpretation of s$\beta_{6}$ estimate.
-Interpretation of s$\beta_{7}$ estimate.
+Hypothesis Testing of $\beta_{3}$ estimate.\
+$H_{0}:\beta_{3} = 0$\
+$H_{a}:\beta_{3} \neq 0$\
+Since the p_value of $\beta_{3}$ is 3.51e-05 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and marital_statusSeparated. \
 
-In addition, the standard error of the estimate is a measure of the accuracy of predictions.As we can see from the graph, the standard error of the estimates of all the parameter are relatively small. When the standard error is small, the sample data is said to be more representative of the true mean. Thus, we also can conclude that out predictions support the true relation of feelings_life, sex, hh_size and marital_status.
+However, we get different result from hypothesis testing of $\beta_{4}$ estimate:\
+$H_{0}:\beta_{4} = 0$\
+$H_{a}:\beta_{4} \neq 0$\
+Since the p_value of $\beta_{4}$ is 0.299090 which is larger than 0.05, we don't reject $H_{0}$ which means that indicates that there is no evidence for us to support the correlation of feelings_life and marital_statusSingle, never married. \
 
-Last but no least, the Residual standard error is the average distance that the response will deviate from the true regression line. In this case, we have residual standard error at 1.605 on 20317 degrees of freedom which tells us that average distance of the data points from the fitted line is about 1.605%. This a relatively small value; hence, we have evidence to suggest the linear model has predictive ability.
+Hypothesis Testing of $\beta_{5}$ estimate.\
+$H_{0}:\beta_{5} = 0$\
+$H_{a}:\beta_{5} \neq 0$\
+Since the p_value of $\beta_{5}$ is 3.03e-07 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and marital_statusWidowed. \
 
-## Discussion
+Hypothesis Testing of $\beta_{6}$ estimate.\
+$H_{0}:\beta_{6} = 0$\
+$H_{a}:\beta_{6} \neq 0$\
+Since the p_value of $\beta_{6}$ is2e-16 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and total_children. \
 
-Here you will discuss conclusions drawn from the results and comment on how it relates to the original goal of the study (which was specified in the Introduction).
+Hypothesis Testing of $\beta_{7}$ estimate.\
+$H_{0}:\beta_{7} = 0$\
+$H_{a}:\beta_{7} \neq 0$\
+Since the p_value of $\beta_{7}$ is 4.53e-05 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and self_rated_healthExcellent. \
+
+Hypothesis Testing of $\beta_{8}$ estimate.\
+$H_{0}:\beta_{8} = 0$\
+$H_{a}:\beta_{8} \neq 0$\
+Since the p_value of $\beta_{8}$ is 0.741545 which is larger than 0.05, we don't reject $H_{0}$ which means that indicates that there is no evidence for us to support the correlation of feelings_life and self_rated_healthFair. \
+
+Hypothesis Testing of $\beta_{9}$ estimate.\
+$H_{0}:\beta_{9} = 0$\
+$H_{a}:\beta_{9} \neq 0$\
+Since the p_value of $\beta_{9}$ is 0.038011 which is smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is correlation of feelings_life and self_rated_healthGood. \
+
+Hypothesis Testing of $\beta_{10}$ estimate.\
+$H_{0}:\beta_{10} = 0$\
+$H_{a}:\beta_{10} \neq 0$\
+Since the p_value of $\beta_{10}$ is 0.000383 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and self_rated_healthPoor. \
+
+Hypothesis Testing of $\beta_{11}$ estimate.\
+$H_{0}:\beta_{11} = 0$\
+$H_{a}:\beta_{11} \neq 0$\
+Since the p_value of $\beta_{11}$ is 0.001902 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and self_rated_healthVery good. \
+
+Hypothesis Testing of $\beta_{12}$ estimate.\
+$H_{0}:\beta_{12} = 0$\
+$H_{a}:\beta_{12} \neq 0$\
+Since the p_value of $\beta_{12}$ is 0.001088 which is smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is correlation of feelings_life and self_rated_mental_healthExcellent. \
+
+Hypothesis Testing of $\beta_{13}$ estimate.\
+$H_{0}:\beta_{13} = 0$\
+$H_{a}:\beta_{13} \neq 0$\
+Since the p_value of $\beta_{13}$ is 2.09e-08 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and self_rated_mental_healthFair. \
+
+Hypothesis Testing of $\beta_{14}$ estimate.\
+$H_{0}:\beta_{14} = 0$\
+$H_{a}:\beta_{14} \neq 0$\
+Since the p_value of $\beta_{14}$ is 0.316905 which is larger than 0.05, we don't reject $H_{0}$ which means that indicates that there is no evidence for us to support the correlation of feelings_life and self_rated_mental_healthGood. \
+
+Hypothesis Testing of $\beta_{15}$ estimate.\
+$H_{0}:\beta_{15} = 0$\
+$H_{a}:\beta_{15} \neq 0$\
+Since the p_value of $\beta_{15}$ is 2e-16 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and self_rated_mental_healthPoor. \
+
+Hypothesis Testing of $\beta_{16}$ estimate.\
+$H_{0}:\beta_{16} = 0$\
+$H_{a}:\beta_{16} \neq 0$\
+Since the p_value of $\beta_{16}$ is 0.214441 which is larger than 0.05, we don't reject $H_{0}$ which means that indicates that there is no evidence for us to support the correlation of feelings_life and self_rated_mental_healthVery good. \
+
+### Standard error 
+
+In addition, the standard error of the estimate is a measure of the accuracy of predictions.As we can see from the graph, the standard error of the estimates of all the parameter are relatively small. When the standard error is small, the sample data is said to be more representative of the true mean. Thus, we also can conclude that out predictions support the true relation of feelings_life, marital_status, total_children,self_rated_health, and self_rated_mental_health.
+
+### Residual standard error 
+
+Last but no least, the Residual standard error is the average distance that the response will deviate from the true regression line. In this case, we have residual standard error at 1.385 on 20266 degrees of freedom which tells us that average distance of the data points from the fitted line is about 1.385%. This a relatively small value; hence, we have evidence to suggest the linear model has predictive ability.
 
 
+# Discussion
+
+## Model intepretation
+
+In term of hypothesis testing of the estimates of parameters in linear regression model, we can conclude that:
+
+### Marital status
+
+We have evidence to support that feelings_life have correlations with marital_statusLiving common-law, marital_statusMarried, marital_statusSeparated, and marital_statusWidowed; while, we have no evidence to conclude that marital_statusSingle, never married has a relationship with feelings_life.\
+In general, marital status does affect people's feeling of life, among these statuses, living common-law and married status create a positive influence on feeling_life; however, separated status affect people's feeling about life negatively. \
+We can see that people who live common-law and married which are in a relatively stable conjugal relationship have a better feeling of life than divorced people on average. Besides, widower also has a positive effect on their feeling of life. 
+
+### Total children
+
+From the result of the hypothesis test of total children, we can conclude that we have strong evidence to support that there is a correlation between feelings_life and total children. In regression line, As total children increase one unit, on average, feelings_life has a slight increase by 0.070904 units. \
+In real life, the first child can increase a parent's happiness the most that parent of one child described higher life satisfaction than those without any children. However, the second child will not increase a parent's feeling of life as much as the first child. As a family have more children, they will have more economic pressures, more quarrel between family members; however, larger families may celebrate more meaning in their lives. Overall, we conclude that the happiness of parents increases as more children they have. 
+
+### Self rated health and Self rated mental health
+
+We have evidence to support that feelings_life have correlations with self_rated_healthExcellent, self_rated_healthGood, self_rated_healthPoor, self_rated_healthVery good; while we don't enough evidence to support this is a correlation with self_rated_healthFair. \
+For Self rated mental health, we also have strong evidence that self_rated_mental_healthExcellent, self_rated_mental_healthFair, and self_rated_mental_healthPoor correlates with feelings_life; however, there is no evidence for us to support self_rated_mental_healthGood correlates with feelings_life.\
+In the regression model, When people rate their health as excellent, their feeling of life increases the most as 0.831200 units, while those rate health as very good and good increase 0.630628 and 0.421057 respectively. However, for those who rate their health as poor, their feeling of life decreases 0.740315 units. \
+For mental health, people rate their mental health as excellent, their feeling of life increases the most as 0.719563 unit. However, when they rate their mental health as fair and poor, their feeling of life decreases 1.248459 and 2.529230 respectively.\
+As we can see, healthier or more metal healthier one person perceives, better life one person can feel. Since health is closely correlated with quality of life, bad physical and mental health unusually cause serious physical and mental diseases which often lead to unemployment, expensive health care and medical treatment and relatively short life span. The high cost of health care and medical treatment cause financial problems especially for those who are unable to work due to bad health or mental condition. Thus, these consequences can severely impact the quality of people's life. \
+ 
+**The source of the dataset and the bias**
+
+The General Social Survey (GSS) program conducted telephone surveys across the ten provinces. This survey mainly collected the family and living conditions of people aged 15 and above in Canada in order to form this GSS dataset. 
+
+The bias: There exists a response bias. Some people were not willing to answer all of the questions and some might not have a phone to answer the call so that the data contains a number of unavailable data (NA) which can have an influence on the accuracy of our analysis and conclusions.
+
+**A discussion of the questionnaire of this survey**
+
+The advantages of the questionnaire are obvious. It involves many aspects of living conditions such as marital status, health condition, and income. Therefore, it provides an overview about the basic living conditions of people aged 15 and over in Canada. 
+ 
+However, the questionnaire also exists some drawbacks. For instance, the question "Using a scale of 0 to 10 means "Very dissatisfied" and 10 means "Very satisfied", how do you feel about your life as a whole right now?". For the option of this question, 0 means very dissatisfied, 5 means generally satisfied and 10 means very satisfied. However, some people who were not satisfied with their life might select 0, 1 or 2 so that this choice makes the resulting data become less accurate. Besides, some questions include privacy issues so that a number of respondents are not willing to disclose their personal information or provide inaccurate data instead. Either one of these situations may influence the accuracy of our analysis and conclusion.
+
+
+# Conclusions
+
+The goal of our analysis is to explore how family (marital status and total children) and health (self-rated health and self-rated mental health) can affect respondents’ feeling of life in the GSS dataset as feelings_life is a good indicator to reflect citizens’ standard of living.
+
+In our report, we discussed some key features, strengths and weaknesses of the data we use firstly. Then, we select two main features (family and health) to fit a multiple linear regression model to estimate the response variable (feelings_life) we chose. In this part, we also use model diagnostics to show that whether we can fit a good model or not. Besides, we use feature and model selection in the appendix. Next, we present our results and explain them. Eventually, we discuss the survey, data and the model and identify the strengths and weaknesses. 
+
+Overall, we find out that a more stable conjugal relationship will increase people's feeling of life; however, we find out that widower also tends to have greater happiness of life which is something surprise us in the result. Besides, people who are healthier in physical and the mental condition tends to have a better quality of life which also reflects as a better feeling of life.
+
+\newpage
 # Weaknesses
 
-Here we discuss weaknesses of the study, data, analysis, etc. You can also discuss areas for improvement.
+**The weakness of data**
+
+We can find out that some people did not response the question since some data in the dataset are unavailable (NA). Besides, some people might answer the questions casually or incorrectly which can cause an error. Therefore, it can have an influence on the accuracy of our analysis so that the weakness of the data is that non-response or response error could exist.
+
+**The weakness of our analysis**
+
+The model we fit in this report is multiple linear regression model which use four independent variables to estimate one response variable called feelings_life. However, we can hardly measure linearity since we just use model selection (See Appendix for more about how we select features) to select the most representative features which can influence feelings_life instead of measuring the linearity. Therefore, the weakness of our analysis is that the linear trend is hard to be estimated.
 
 
 # Next Steps
 
-Here you discuss subsequent work to be done after this report. This can include next steps in terms of statistical analysis (perhaps there is a more efficient algorithm available, or perhaps there is a caveat in the data that would allow for some new technique). Future steps should also be specified in terms of the study setting (eg. including a follow-up survey on something, or a subsequent study that would complement the conclusions of your report).
+**More Analysis: **
+
+1. We can try more models for a better demonstration of the relationships. For example, Generalized Additive Model may be helpful for exploring non-linear relationships. The function term in this model may have a positive effect in our model accuracy. 
+
+2. We can also add more features to our model and penalize overfitting by methods such as Ridge regression and LASSO regression. This can improve our feature selection and at the same time identifying the most significant features. 
+
+3. We can train models and do some predictions, which is useful not only in knowing more about the performance about our model, but also in making predictions when we get more data and assess their feelings of lives. In order to train a more accurate model, machine learning techniques such as neural network may be a good choice. 
 
 
-## References
+# References
 
+“Welcome to My.access -- Please Choose How You Will Connect.” My.access - University
+  of Toronto Libraries Portal,     
+  sda-artsci-utoronto-ca.myaccess.library.utoronto.ca/cgi-bin/sda/
+  hsda?harcsda4+gss3. 
+Hayes, Adam. “Reading Into Stratified Random Sampling.” Investopedia, Investopedia, 
+  16 Sept. 2020, www.investopedia.com/terms/stratified_random_sampling.asp. 
+
+Hadley Wickham, Romain François, Lionel Henry and Kirill Müller
+  (2020). dplyr: A Grammar of Data Manipulation. R package version
+  1.0.2. https://CRAN.R-project.org/package=dplyr
+  Wickham et al., (2019). Welcome to the tidyverse. Journal of Open
+  
+Source Software, 4(43), 1686, https://doi.org/10.21105/joss.01686
+  Yihui Xie (2020). knitr: A General-Purpose Package for Dynamic Report
+  Generation in R. R package version 1.29.
+
+Yihui Xie (2015) Dynamic Documents with R and knitr. 2nd edition.
+  Chapman and Hall/CRC. ISBN 978-1498716963
+
+Yihui Xie (2014) knitr: A Comprehensive Tool for Reproducible
+  Research in R. In Victoria Stodden, Friedrich Leisch and Roger D.
+  Peng, editors, Implementing Reproducible Computational Research.
+  Chapman and Hall/CRC. ISBN 978-1466561595
+  
+Baptiste Auguie (2017). gridExtra: Miscellaneous Functions for "Grid"
+  Graphics. R package version 2.3.
+  https://CRAN.R-project.org/package=gridExtra
+
+
+# Appendix
+
+## Feature selection 
+
+First of all, we chose a response variable that we are interested in: feelings of life. 
+
+Next, we identified several parts of possible features:
+
+1. Basic information: age, sex, region (make sure that the survey is evenly distributed between these categories, making the inference representative)
+
+2. Family: marital_status, total_children
+
+3. Living condition: own_rent, living_arrangement, hh_type, hh_size
+
+4. Health: self_rated_health, self_rated_mental_health
+
+5. religon: regilion_importance
+
+6. Knowledge and education: language_knowledge, education
+
+7. Financial status: income_family, income_respondent
+
+We then clean the data select these features above into a single data frame. Here is a table of the first few rows of our cleaned data. 
+
+```{r, echo = FALSE,fig.height = 3, fig.width = 3, fig.align = "center"}
+data.0 <- gss %>%
+  select(feelings_life, age, sex, region, pop_center, marital_status, total_children, own_rent, living_arrangement, hh_type, hh_size, self_rated_health, self_rated_mental_health, regilion_importance, language_knowledge, education, income_family, income_respondent)
+
+data.0 = na.omit(data.0)
+
+kable(head(data.0))
+```
+
+We then implemented backward BIC (Bayesian Information Criterion) to select the features. This method involves choosing the optimum model by deleting one most insignificant feature a time. BIC is a penalized cost function for the model. After several steps, when the value of BIC reaches its minimum, we get our optimum model. 
+
+```{r, echo = FALSE}
+full <- lm(feelings_life ~ age + as.factor(sex) + region + pop_center + marital_status + total_children + own_rent + living_arrangement + hh_type + hh_size + self_rated_health + self_rated_mental_health + regilion_importance + language_knowledge + education + income_family + income_respondent , data = data.0) 
+step <- step(full, direction = "backward", trace = FALSE, k = log(19860))
+step$anova
+```
+
+We can see that seven features are deleted from the model. However, this model also has too many features for us to work with. We are looking for some features that are most influential to feelings of life. 
+
+We then turn to choose from the remaining model by assessing the p-values of the coefficients. We tend to choose features with smaller p-value, which means more likely to reject the null hypothesis of coefficients being zero. The summary table of our model after using BIC is below. 
+
+```{r, echo = FALSE}
+mod.bic = lm(formula = feelings_life ~ age + as.factor(sex) + pop_center + marital_status + total_children + own_rent + self_rated_health + 
+self_rated_mental_health + regilion_importance + education, 
+data = data.0)
+summary(mod.bic)
+```
+
+It can be seen from the above summary table that the p-values are smallest in terms ```marital_status, total_children, self_rated_health, self_rated_mental_health```. Thus we choose these features for our final linear model. 
 
 

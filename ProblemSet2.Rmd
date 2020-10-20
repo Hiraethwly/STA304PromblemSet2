@@ -19,7 +19,7 @@ library(gridExtra)
 
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warnings=F}
 library(readr)
 gss <- read.csv("gss.csv")
 ```
@@ -125,7 +125,7 @@ We reject features based on the following criterion:
 We clean the data using the package ```tidyverse``` and removed all the NAs in the cleaned data. Here is the first few rows of the data we will use. (Table 1)
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, warnings=F}
 
 data <- gss %>%
   select(feelings_life, age, sex, marital_status, total_children, self_rated_health, self_rated_mental_health)
@@ -137,7 +137,7 @@ kable(head(data), caption = "Table 1 - First few rows of data")
 
 Here are two summary about the numerical (Table 2) and categorical (Table 3) data that we will use. 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, warnings=F}
 kable(summary(data[c(1,5)]), caption = "Table 2 - Summary of numerical data")
 
 Marital_status = as.data.frame(table(data$marital_status))
@@ -152,7 +152,7 @@ kable(cbind(c("Maritial status", "", "Self rated health", "","Self rated mental 
 
 Here are two plots that can depict the basic composition of the sample: The sex (Graph 1) and the age (Graph 2). 
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warnings=F}
 sex = as.data.frame(table(data$sex))
 names(sex) = c('group', 'value')
 sex <- sex %>% 
@@ -187,7 +187,7 @@ Thus this sample is valid for inferences.
 
 Here is the Histogram for our variable of interest -- Feelings of life (Graph 3). 
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warnings=F}
 data %>% 
   ggplot(aes(x = feelings_life)) + 
   geom_histogram(bins = 10) + 
@@ -211,16 +211,18 @@ From the above histogram of feelings_life:
 
 #### Health & feelings of life
 
-```{r, echo = FALSE, fig.height = 3, fig.width = 5, fig.align = "center"}
+Below is the boxplots between health and feelings of life (Graph 4 and Graph 5)
+
+```{r, echo = FALSE, fig.height = 3, fig.width = 5, fig.align = "center", warnings=F}
 plot.health <- data %>% 
   ggplot(aes(x = self_rated_health, y = feelings_life)) + 
   geom_boxplot() + 
-  labs(title = "Feelings of life vs. Self rated health (Graph 4)", x = "health", y = "feelings")
+  labs(title = "Graph 4 - Feelings of life vs. Self rated health ", x = "health", y = "feelings")
 
 plot.mhealth <- data %>% 
   ggplot(aes(x = self_rated_mental_health, y = feelings_life)) + 
   geom_boxplot() + 
-  labs(title = "Feelings of life vs. Self rated mental health (Graph 5)", x = "mental health", y = "feelings")
+  labs(title = "Graph 5 - Feelings of life vs. Self rated mental health ", x = "mental health", y = "feelings")
 
 grid.arrange(plot.health, plot.mhealth, nrow = 2)
 ```
@@ -241,18 +243,24 @@ b. The IQR (Interquartile range) of the boxplot (Don't know) is the largest. The
 
 #### Family & Feelings of life
 
-```{r, echo = FALSE}
-data %>%
+Below is the summary table for relationship between feelings of life and marital status (Table 4) and total children (Table 5)
+
+```{r, echo = FALSE, warning=FALSE}
+table.m = data %>%
   group_by(marital_status) %>%
   summarise(mean_feelings_life = mean(feelings_life), sd_feelings_life = sd(feelings_life), min_feelings_life = min(feelings_life), max_feelings_life = max(feelings_life), median_feelings_life = median(feelings_life)) %>%
   arrange(desc(mean_feelings_life))
+
+kable(table.m, caption = "Table 4: Feelings of life & marital status")
 ```
 
-```{r, echo = FALSE}
-data %>%
+```{r, echo = FALSE, warning=F}
+table.t = data %>%
   group_by(total_children) %>%
   summarise(mean_feelings_life = mean(feelings_life), sd_feelings_life = sd(feelings_life), min_feelings_life = min(feelings_life), max_feelings_life = max(feelings_life), median_feelings_life = median(feelings_life)) %>%
   arrange(desc(mean_feelings_life))
+
+kable(table.t, caption = "Table 5: Feelings of life & total children")
 ```
 
 **Inference:**
@@ -286,12 +294,23 @@ Overall, we chose these four independent variables and use them in the model to 
 2. For the Bayesian model, it assumes the parameters we would like to explore follow some distributions. However, we did not explore the distributions of those four variables so that we can not use the Bayesian model.
 
 3. For the logistics regression model, it is a statistical model that in its basic form uses a logistic function to model a binary response variable. We use feelings_life as the response variable which counts from 0 to 10. Different number represents different levels of satisfaction. If we change our response variable to the binary form 0 and 1, it can only show whether a person is happy or not instead of showing different levels of satisfaction. Therefore, we are not willing to change the response variable to a binary form so that we can not use the logistics regression model.
-```{r echo=FALSE}
+```{r echo=FALSE, warnings=F}
 mod <- lm(feelings_life ~ marital_status + total_children + self_rated_health + self_rated_mental_health, data = data)
 ```
 
 \newpage
 **Our Linear Model:**
+
+$$\begin{aligned}
+\hat{feelings\_life} &= 7.050402 + 0.353663marital\_statusLiving common-law + 0.519051marital\_statusMarried \\
+&-0.267279marital\_statusSeparated +0.042546marital\_statusSingle, never married \\ &+0.238293marital\_statusWidowed + 0.070904total\_children\\
+&+0.831200self\_rated\_healthExcellent +0.067463self\_rated\_healthFair  \\
+&+0.421057 self\_rated\_healthGood \\
+&-0.740315self\_rated\_healthPoor +  0.630628 self\_rated\_healthVery good\\ &+0.719563self\_rated\_mental\_healthExcellent \\ &-1.248459self\_rated\_mental\_healthFair\\
+&-0.220055self\_rated\_mental\_healthGood -2.529230 self\_rated\_mental\_healthPoor\\
+&+0.273097 \beta_{16}self\_rated\_mental\_healthVery good
+\end{aligned}$$
+
 
 ## Model Diagnostics
 
@@ -324,7 +343,7 @@ This kind of plot can help us to find the influential cases. We have known that 
 Here is the summary table for our model. (Summary table 1)
 
 Summary table 1 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warnings=F}
 mod <- lm(feelings_life ~ marital_status + total_children + self_rated_health + self_rated_mental_health, data = data)
 summary(mod)
 ```
@@ -355,95 +374,24 @@ From the above regression line, we can interpret as if given other predictors ho
 
 ### Hypothesis tests
 
-In order to test whenever there is a significant linear relationship between feelings_life, marital_status, total_children,self_rated_health, and self_rated_mental_health. We need to do hypothesis testing for the estimates of the regression parameters.
+In order to test whenever there is a significant linear relationship between feelings_life, marital_status, total_children,self_rated_health, and self_rated_mental_health. We need to do hypothesis testing for the estimates of the regression parameters. 
 
-Hypothesis Testing of intercept estimate.\
-$H_{0}:\beta_{0} = 0$\
-$H_{a}:\beta_{0} \neq 0$\
-The null hypothesis states that the $\beta_{0}$ is equal to zero, while the alternative hypothesis states that the $\beta_{0}$ is not equal to zero.\
-In this case, we use a benchmark significance level of 5%;thus,the p_value of the intercept estimate is 2e-16 which is extremely smaller than 0.05. \
-As a result, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and intercept estimate. \
+For each slope estimates $\beta_{n}$:
 
-Hypothesis Testing of $\beta_{1}$ estimate.\
-$H_{0}:\beta_{1} = 0$\
-$H_{a}:\beta_{1} \neq 0$\
-The null hypothesis states that the $\beta_{1}$ is equal to zero, while the alternative hypothesis states that the $\beta_{1}$ is not equal to zero.\
-Since the p_value of $\beta_{1}$ is 7.72e-15 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and marital_statusLiving common-law. \
+$H_{0}:\beta_{n} = 0$\
+$H_{a}:\beta_{n} \neq 0$
 
-Hypothesis Testing of $\beta_{2}$ estimate.\
-$H_{0}:\beta_{2} = 0$\
-$H_{a}:\beta_{2} \neq 0$\
-Since the p_value of $\beta_{2}$ is 2e-16 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and marital_statusMarried. \
+The null hypothesis states that the $\beta_{n}$ is equal to zero, while the alternative hypothesis states that the $\beta_{n}$ is not equal to zero.\
+In this case, we use a benchmark significance level of 5%
 
-Hypothesis Testing of $\beta_{3}$ estimate.\
-$H_{0}:\beta_{3} = 0$\
-$H_{a}:\beta_{3} \neq 0$\
-Since the p_value of $\beta_{3}$ is 3.51e-05 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and marital_statusSeparated. \
+**See the whole hypothesis test in Appendix**
 
-However, we get different result from hypothesis testing of $\beta_{4}$ estimate:\
-$H_{0}:\beta_{4} = 0$\
-$H_{a}:\beta_{4} \neq 0$\
-Since the p_value of $\beta_{4}$ is 0.299090 which is larger than 0.05, we don't reject $H_{0}$ which means that indicates that there is no evidence for us to support the correlation of feelings_life and marital_statusSingle, never married. \
+**Here is our result of the test: **
 
-Hypothesis Testing of $\beta_{5}$ estimate.\
-$H_{0}:\beta_{5} = 0$\
-$H_{a}:\beta_{5} \neq 0$\
-Since the p_value of $\beta_{5}$ is 3.03e-07 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and marital_statusWidowed. \
+1. The significant features are: marital_statusLiving common-law, marital_statusMarried, marital_statusSeparated,  marital_statusWidowed, total_children, self_rated_healthExcellent, self_rated_healthGood, self_rated_healthPoor, self_rated_healthVery good, self_rated_mental_healthExcellent, self_rated_mental_healthFair, and self_rated_mental_healthPoor correlates with feelings_life
 
-Hypothesis Testing of $\beta_{6}$ estimate.\
-$H_{0}:\beta_{6} = 0$\
-$H_{a}:\beta_{6} \neq 0$\
-Since the p_value of $\beta_{6}$ is2e-16 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and total_children. \
+1. The insignifiant features are: marital_statusSingle, never married, self_rated_healthFair, self_rated_mental_healthGood
 
-Hypothesis Testing of $\beta_{7}$ estimate.\
-$H_{0}:\beta_{7} = 0$\
-$H_{a}:\beta_{7} \neq 0$\
-Since the p_value of $\beta_{7}$ is 4.53e-05 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and self_rated_healthExcellent. \
-
-Hypothesis Testing of $\beta_{8}$ estimate.\
-$H_{0}:\beta_{8} = 0$\
-$H_{a}:\beta_{8} \neq 0$\
-Since the p_value of $\beta_{8}$ is 0.741545 which is larger than 0.05, we don't reject $H_{0}$ which means that indicates that there is no evidence for us to support the correlation of feelings_life and self_rated_healthFair. \
-
-Hypothesis Testing of $\beta_{9}$ estimate.\
-$H_{0}:\beta_{9} = 0$\
-$H_{a}:\beta_{9} \neq 0$\
-Since the p_value of $\beta_{9}$ is 0.038011 which is smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is correlation of feelings_life and self_rated_healthGood. \
-
-Hypothesis Testing of $\beta_{10}$ estimate.\
-$H_{0}:\beta_{10} = 0$\
-$H_{a}:\beta_{10} \neq 0$\
-Since the p_value of $\beta_{10}$ is 0.000383 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and self_rated_healthPoor. \
-
-Hypothesis Testing of $\beta_{11}$ estimate.\
-$H_{0}:\beta_{11} = 0$\
-$H_{a}:\beta_{11} \neq 0$\
-Since the p_value of $\beta_{11}$ is 0.001902 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and self_rated_healthVery good. \
-
-Hypothesis Testing of $\beta_{12}$ estimate.\
-$H_{0}:\beta_{12} = 0$\
-$H_{a}:\beta_{12} \neq 0$\
-Since the p_value of $\beta_{12}$ is 0.001088 which is smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is correlation of feelings_life and self_rated_mental_healthExcellent. \
-
-Hypothesis Testing of $\beta_{13}$ estimate.\
-$H_{0}:\beta_{13} = 0$\
-$H_{a}:\beta_{13} \neq 0$\
-Since the p_value of $\beta_{13}$ is 2.09e-08 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and self_rated_mental_healthFair. \
-
-Hypothesis Testing of $\beta_{14}$ estimate.\
-$H_{0}:\beta_{14} = 0$\
-$H_{a}:\beta_{14} \neq 0$\
-Since the p_value of $\beta_{14}$ is 0.316905 which is larger than 0.05, we don't reject $H_{0}$ which means that indicates that there is no evidence for us to support the correlation of feelings_life and self_rated_mental_healthGood. \
-
-Hypothesis Testing of $\beta_{15}$ estimate.\
-$H_{0}:\beta_{15} = 0$\
-$H_{a}:\beta_{15} \neq 0$\
-Since the p_value of $\beta_{15}$ is 2e-16 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and self_rated_mental_healthPoor. \
-
-Hypothesis Testing of $\beta_{16}$ estimate.\
-$H_{0}:\beta_{16} = 0$\
-$H_{a}:\beta_{16} \neq 0$\
-Since the p_value of $\beta_{16}$ is 0.214441 which is larger than 0.05, we don't reject $H_{0}$ which means that indicates that there is no evidence for us to support the correlation of feelings_life and self_rated_mental_healthVery good. \
 
 ### Standard error 
 
@@ -576,36 +524,129 @@ Next, we identified several parts of possible features:
 
 7. Financial status: income_family, income_respondent
 
-We then clean the data select these features above into a single data frame. Here is a table of the first few rows of our cleaned data. 
+We clean the data select these features above into a single data frame. 
 
-```{r, echo = FALSE,fig.height = 3, fig.width = 3, fig.align = "center"}
+```{r, echo = FALSE, warnings=F}
 data.0 <- gss %>%
   select(feelings_life, age, sex, region, pop_center, marital_status, total_children, own_rent, living_arrangement, hh_type, hh_size, self_rated_health, self_rated_mental_health, regilion_importance, language_knowledge, education, income_family, income_respondent)
 
 data.0 = na.omit(data.0)
 
-kable(head(data.0))
 ```
 
 We then implemented backward BIC (Bayesian Information Criterion) to select the features. This method involves choosing the optimum model by deleting one most insignificant feature a time. BIC is a penalized cost function for the model. After several steps, when the value of BIC reaches its minimum, we get our optimum model. 
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warnings=F}
 full <- lm(feelings_life ~ age + as.factor(sex) + region + pop_center + marital_status + total_children + own_rent + living_arrangement + hh_type + hh_size + self_rated_health + self_rated_mental_health + regilion_importance + language_knowledge + education + income_family + income_respondent , data = data.0) 
 step <- step(full, direction = "backward", trace = FALSE, k = log(19860))
-step$anova
+kable(step$anova, caption = "Table 7 - BIC")
 ```
 
-We can see that seven features are deleted from the model. However, this model also has too many features for us to work with. We are looking for some features that are most influential to feelings of life. 
+From the table above (Table 7), We can see that seven features are deleted from the model. However, this model also has too many features for us to work with. We are looking for some features that are most influential to feelings of life. 
 
 We then turn to choose from the remaining model by assessing the p-values of the coefficients. We tend to choose features with smaller p-value, which means more likely to reject the null hypothesis of coefficients being zero. The summary table of our model after using BIC is below. 
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warnings=F}
 mod.bic = lm(formula = feelings_life ~ age + as.factor(sex) + pop_center + marital_status + total_children + own_rent + self_rated_health + 
 self_rated_mental_health + regilion_importance + education, 
 data = data.0)
-summary(mod.bic)
+
+names = names(mod.bic$coefficients)
+pvalue = c('< 2e-16', 3.08e-07, 6.84e-08, 0.020967, 2.68e-05, '< 2e-16', '< 2e-16', 5.32e-05, 0.026131, 0.061447, 3.30e-06, 0.957786, 0.455780, 2.83e-06, 0.441573, 0.008111, 0.002519, 0.000220, 2.83e-05, 1.87e-05, 0.928233, '< 2e-16', 0.024585, 0.064259, 0.050481, 0.080718, 0.834614, 0.091784, 0.000143, '< 2e-16', 0.020429, 0.124352, 0.694212)
+kable(cbind(names, pvalue), caption = "Table 8 - p-values")
 ```
 
-It can be seen from the above summary table that the p-values are smallest in terms ```marital_status, total_children, self_rated_health, self_rated_mental_health```. Thus we choose these features for our final linear model. 
+It can be seen from the above table (Table 8) that the p-values are smallest in terms ```marital_status, total_children, self_rated_health, self_rated_mental_health```. Thus we choose these features for our final linear model. 
 
+
+
+## Hypothesis tests
+
+Hypothesis Testing of intercept estimate.\
+$H_{0}:\beta_{0} = 0$\
+$H_{a}:\beta_{0} \neq 0$\
+The null hypothesis states that the $\beta_{0}$ is equal to zero, while the alternative hypothesis states that the $\beta_{0}$ is not equal to zero.\
+In this case, we use a benchmark significance level of 5%;thus,the p_value of the intercept estimate is 2e-16 which is extremely smaller than 0.05. \
+As a result, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and intercept estimate. \
+
+Hypothesis Testing of $\beta_{1}$ estimate.\
+$H_{0}:\beta_{1} = 0$\
+$H_{a}:\beta_{1} \neq 0$\
+The null hypothesis states that the $\beta_{1}$ is equal to zero, while the alternative hypothesis states that the $\beta_{1}$ is not equal to zero.\
+Since the p_value of $\beta_{1}$ is 7.72e-15 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and marital_statusLiving common-law. \
+
+Hypothesis Testing of $\beta_{2}$ estimate.\
+$H_{0}:\beta_{2} = 0$\
+$H_{a}:\beta_{2} \neq 0$\
+Since the p_value of $\beta_{2}$ is 2e-16 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and marital_statusMarried. \
+
+Hypothesis Testing of $\beta_{3}$ estimate.\
+$H_{0}:\beta_{3} = 0$\
+$H_{a}:\beta_{3} \neq 0$\
+Since the p_value of $\beta_{3}$ is 3.51e-05 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and marital_statusSeparated. \
+
+However, we get different result from hypothesis testing of $\beta_{4}$ estimate:\
+$H_{0}:\beta_{4} = 0$\
+$H_{a}:\beta_{4} \neq 0$\
+Since the p_value of $\beta_{4}$ is 0.299090 which is larger than 0.05, we don't reject $H_{0}$ which means that indicates that there is no evidence for us to support the correlation of feelings_life and marital_statusSingle, never married. \
+
+Hypothesis Testing of $\beta_{5}$ estimate.\
+$H_{0}:\beta_{5} = 0$\
+$H_{a}:\beta_{5} \neq 0$\
+Since the p_value of $\beta_{5}$ is 3.03e-07 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and marital_statusWidowed. \
+
+Hypothesis Testing of $\beta_{6}$ estimate.\
+$H_{0}:\beta_{6} = 0$\
+$H_{a}:\beta_{6} \neq 0$\
+Since the p_value of $\beta_{6}$ is2e-16 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and total_children. \
+
+Hypothesis Testing of $\beta_{7}$ estimate.\
+$H_{0}:\beta_{7} = 0$\
+$H_{a}:\beta_{7} \neq 0$\
+Since the p_value of $\beta_{7}$ is 4.53e-05 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and self_rated_healthExcellent. \
+
+Hypothesis Testing of $\beta_{8}$ estimate.\
+$H_{0}:\beta_{8} = 0$\
+$H_{a}:\beta_{8} \neq 0$\
+Since the p_value of $\beta_{8}$ is 0.741545 which is larger than 0.05, we don't reject $H_{0}$ which means that indicates that there is no evidence for us to support the correlation of feelings_life and self_rated_healthFair. \
+
+Hypothesis Testing of $\beta_{9}$ estimate.\
+$H_{0}:\beta_{9} = 0$\
+$H_{a}:\beta_{9} \neq 0$\
+Since the p_value of $\beta_{9}$ is 0.038011 which is smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is correlation of feelings_life and self_rated_healthGood. \
+
+Hypothesis Testing of $\beta_{10}$ estimate.\
+$H_{0}:\beta_{10} = 0$\
+$H_{a}:\beta_{10} \neq 0$\
+Since the p_value of $\beta_{10}$ is 0.000383 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and self_rated_healthPoor. \
+
+Hypothesis Testing of $\beta_{11}$ estimate.\
+$H_{0}:\beta_{11} = 0$\
+$H_{a}:\beta_{11} \neq 0$\
+Since the p_value of $\beta_{11}$ is 0.001902 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and self_rated_healthVery good. \
+
+Hypothesis Testing of $\beta_{12}$ estimate.\
+$H_{0}:\beta_{12} = 0$\
+$H_{a}:\beta_{12} \neq 0$\
+Since the p_value of $\beta_{12}$ is 0.001088 which is smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is correlation of feelings_life and self_rated_mental_healthExcellent. \
+
+Hypothesis Testing of $\beta_{13}$ estimate.\
+$H_{0}:\beta_{13} = 0$\
+$H_{a}:\beta_{13} \neq 0$\
+Since the p_value of $\beta_{13}$ is 2.09e-08 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and self_rated_mental_healthFair. \
+
+Hypothesis Testing of $\beta_{14}$ estimate.\
+$H_{0}:\beta_{14} = 0$\
+$H_{a}:\beta_{14} \neq 0$\
+Since the p_value of $\beta_{14}$ is 0.316905 which is larger than 0.05, we don't reject $H_{0}$ which means that indicates that there is no evidence for us to support the correlation of feelings_life and self_rated_mental_healthGood. \
+
+Hypothesis Testing of $\beta_{15}$ estimate.\
+$H_{0}:\beta_{15} = 0$\
+$H_{a}:\beta_{15} \neq 0$\
+Since the p_value of $\beta_{15}$ is 2e-16 which is extremely smaller than 0.05, we reject $H_{0}$ in favor of the alternative hypothesis which indicates that there is significant correlation of feelings_life and self_rated_mental_healthPoor. \
+
+Hypothesis Testing of $\beta_{16}$ estimate.\
+$H_{0}:\beta_{16} = 0$\
+$H_{a}:\beta_{16} \neq 0$\
+Since the p_value of $\beta_{16}$ is 0.214441 which is larger than 0.05, we don't reject $H_{0}$ which means that indicates that there is no evidence for us to support the correlation of feelings_life and self_rated_mental_healthVery good. \
 

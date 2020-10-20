@@ -314,6 +314,10 @@ $$\begin{aligned}
 
 ## Model Diagnostics
 
+Below is the linear model diagnostics plots (Graph 6)
+
+Graph 6 - Linear model diagnostics plot
+
 ```{r warning=FALSE}
 library(ggfortify)
 autoplot(mod, size = 0.2, label.size = 2)
